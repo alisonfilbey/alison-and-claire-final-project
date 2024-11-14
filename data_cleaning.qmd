@@ -1,0 +1,35 @@
+---
+title: "Final Project"
+format: html
+---
+
+
+```{python}
+import pandas as pd
+import geopandas as gpd
+from shapely import wkt
+
+crashes = pd.read_csv("Data/Traffic_Crashes_Crashes.csv")
+```
+
+
+```{python}
+#clean crashes data
+
+#drop missing and outlier locations
+crashes = crashes[crashes["LATITUDE"] != 0]
+crashes = crashes[crashes["LOCATION"].notna()]
+
+#create geometry column to turn into geopandas object
+crashes["LOCATION"] = crashes["LOCATION"].apply(wkt.loads)
+crashes_gdf = gpd.GeoDataFrame(crashes, geometry="LOCATION")
+
+#set crs
+crashes_gdf = crashes_gdf.set_crs("EPSG:4326", inplace=True)
+```
+
+
+```{python}
+#plot data to see what it looks like
+crashes_gdf.plot()
+```

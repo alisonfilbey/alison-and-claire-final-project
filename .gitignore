@@ -1,0 +1,9 @@
+*.csv
+*.dbf
+*.prj
+*.shp
+*.shx
+*.xml
+*.DS_Store
+*.cpg
+*.txt

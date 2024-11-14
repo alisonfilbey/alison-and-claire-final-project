@@ -12,6 +12,12 @@ from shapely import wkt
 crashes = pd.read_csv("Data/Traffic_Crashes_Crashes.csv")
 ```
 
+```{python}
+#loading the crashes - people data
+crashes_people = pd.read_csv(r'Data\Traffic_Crashes_People.csv', low_memory=False)
+crashes_crashes_people = pd.merge(crashes, crashes_people, on = 'CRASH_RECORD_ID')
+
+```
 
 ```{python}
 #clean crashes data
@@ -32,4 +38,13 @@ crashes_gdf = crashes_gdf.set_crs("EPSG:4326", inplace=True)
 ```{python}
 #plot data to see what it looks like
 crashes_gdf.plot()
+```
+
+```{python}
+#checking for duplicates
+#crashes_crashes_people.duplicated().sum()
+#data_types = crashes_crashes_people.dtypes
+number_of_crashes = crashes_crashes_people.groupby('CRASH_RECORD_ID').size().reset_index()
+number_of_crashes_zipcode = crashes_crashes_people.groupby(['ZIPCODE','CRASH_RECORD_ID']).size().reset_index()
+number_of_people_zipcode = crashes_crashes_people.groupby(['ZIPCODE']).size().reset_index()
 ```

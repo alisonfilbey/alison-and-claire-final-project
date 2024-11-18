@@ -131,13 +131,6 @@ hp_roads_gdf["buffer"] = hp_roads_gdf.geometry.buffer(buffer_distance)
 
 #create new geodataframe for buffers
 buffered_gdf = hp_roads_gdf.set_geometry("buffer")
-
-ax = hp_roads_gdf.plot(color='blue', linewidth=1, figsize=(10, 8), label='Original LineStrings')
-buffered_gdf.plot(ax=ax, color='lightblue', alpha=0.5, label='Buffer')
-hp_crashes_gdf.plot(ax=ax, color="black", markersize=0.5)
-
-ax.legend()
-plt.show()
 ```
 
 ```{python}

@@ -91,6 +91,7 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
         height=300, width=300)
 ```
 
+<<<<<<< HEAD
 ```{python}
 merge pedestrian actions into crash data
 ped_actions = people[['PEDPEDAL_ACTION', 'CRASH_RECORD_ID']]
@@ -123,6 +124,8 @@ alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Act
 ```
 
 
+=======
+>>>>>>> main
 ## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
 #load road and community area data
@@ -228,6 +231,9 @@ top_roads = top_roads.rename(
 
 print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
 ```
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> main

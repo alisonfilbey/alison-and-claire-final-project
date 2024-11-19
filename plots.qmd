@@ -9,6 +9,8 @@ import geopandas as gpd
 from shapely import wkt
 import numpy as np
 import altair as alt
+import matplotlib.pyplot as plt
+import contextily as ctx
 
 crashes = pd.read_csv("Data/Traffic_Crashes_Crashes.csv")
 people = pd.read_csv("Data/Traffic_Crashes_People.csv")
@@ -87,4 +89,110 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
 ).properties(title={
         "text": ["Severe or Fatal Pedestrian Injuries", "by Posted Speed Limit"]},
         height=300, width=300)
+```
+
+## CREATING EXAMPLE MAP OF HYDE PARK
+```{python}
+#load road and community area data
+roads = pd.read_csv("Data/chicago_roads.csv")
+comm_areas = pd.read_csv("Data/CommAreas.csv")
+
+#create geometry column to turn roads csv into geopandas object
+roads["geometry"] = roads["the_geom"].apply(wkt.loads)
+roads_gdf = gpd.GeoDataFrame(roads, geometry="geometry")
+roads_gdf = roads_gdf.set_crs("EPSG:4326", inplace=True)
+
+#create geometry column to turn ped crashes df geopandas object
+ped_crashes_gdf = gpd.GeoDataFrame(ped_crashes, geometry="geometry")
+ped_crashes_gdf = ped_crashes_gdf.set_crs("EPSG:4326", inplace=True)
+
+#create geometry column to turn community areas csv into geopandas object
+comm_areas["geometry"] = comm_areas["the_geom"].apply(wkt.loads)
+comm_areas_gdf = gpd.GeoDataFrame(comm_areas, geometry="geometry")
+comm_areas_gdf = comm_areas_gdf.set_crs("EPSG:4326", inplace=True)
+```
+
+
+```{python}
+#subset to hyde park
+comm_areas_gdf = comm_areas_gdf.loc[comm_areas_gdf["COMMUNITY"]=="HYDE PARK"]
+
+#subset roads and crashes to hyde park with spatial join
+hp_roads_gdf = gpd.sjoin(roads_gdf, comm_areas_gdf, how="inner")
+hp_crashes_gdf = gpd.sjoin(ped_crashes_gdf, comm_areas_gdf, how="inner")
+```
+
+```{python}
+#define buffer distance around each road so that crash points lie within buffer
+buffer_distance = 0.00025
+
+#create buffer around roads for spatial join
+hp_roads_gdf["buffer"] = hp_roads_gdf.geometry.buffer(buffer_distance)
+
+#create new geodataframe for buffers
+buffered_gdf = hp_roads_gdf.set_geometry("buffer")
+```
+
+```{python}
+#spatial join crashes with buffers to get street name where crash occured
+buffered_gdf = buffered_gdf.drop(['index_right'], axis=1)
+hp_crashes_gdf = hp_crashes_gdf.drop(['index_right'], axis=1)
+hp_crashes_gdf = gpd.sjoin(hp_crashes_gdf, buffered_gdf, how="left", predicate="within")
+```
+
+```{python}
+#group by street and calculate number of crashes
+severe_crashes_by_road = hp_crashes_gdf.groupby("STREET_NAM")[
+    ["n_peds_total", "n_peds_severe"]].sum().reset_index()
+
+#calculate share of severe ped crashes by speed
+severe_crashes_by_road["share_severe"] = severe_crashes_by_road[
+    "n_peds_severe"]/severe_crashes_by_road["n_peds_total"]
+hp_roads_gdf = pd.merge(hp_roads_gdf, severe_crashes_by_road, on="STREET_NAM", how="left")
+```
+
+```{python}
+#reproject so that the data can plot with the basemap
+comm_areas_gdf = comm_areas_gdf.to_crs(epsg=3857)
+hp_roads_gdf = hp_roads_gdf.to_crs(epsg=3857)
+
+fig, ax = plt.subplots(figsize=(10, 8))
+
+#plot the community areas with transparent fill and black outline
+comm_areas_gdf.plot(ax=ax, facecolor="none", edgecolor="black")
+
+#plot the roads colored by the number of severe pedestrian crashes
+hp_roads_gdf.plot(column="n_peds_severe", legend=True, cmap="RdYlGn_r", ax=ax,
+                  legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
+
+#add basemap
+ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron)
+
+ax.set_axis_off()
+ax.set_title("Roadway Locations of Severe Pedestrian Crashes in Hyde Park", fontsize=14)
+plt.show()
+```
+
+```{python}
+#get summary statistics of crashes in the neighborhood
+
+#function to find mode of a column
+def mode(series):
+    return series.mode().iloc[0] if not series.mode().empty else None
+
+#group by street and find the most frequent speed limit
+most_frequent_speed = hp_crashes_gdf.groupby("STREET_NAM")[
+    "binned_posted_speed"].apply(mode).reset_index()
+
+#find roads with most severe ped crashes
+top_roads = severe_crashes_by_road.sort_values(by="n_peds_severe", ascending=False)[["STREET_NAM", "n_peds_severe"]].head(3)
+
+#merge with speed limit
+top_roads = pd.merge(top_roads, most_frequent_speed, on="STREET_NAM", how="left")
+top_roads = top_roads.rename(
+    {"STREET_NAM":"Street Name", 
+    "n_peds_severe":"Number of Severe Ped Crashes",
+    "binned_posted_speed":"Speed Limit"}, axis=1)
+
+print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
 ```

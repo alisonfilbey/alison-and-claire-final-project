@@ -91,6 +91,44 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
         height=300, width=300)
 ```
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+```{python}
+merge pedestrian actions into crash data
+ped_actions = people[['PEDPEDAL_ACTION', 'CRASH_RECORD_ID']]
+ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="inner")
+
+ped_action = ped_crashes[ped_crashes['n_peds_total']==1]
+
+#subset to tope ten actions 
+ped_action = ped_action[ped_action['PEDPEDAL_ACTION'].isin([
+    'CROSSING - WITH SIGNAL',
+    'OTHER ACTION',
+    'CROSSING - NO CONTROLS (NOT AT INTERSECTION)',
+    'NO ACTION',
+    'CROSSING - NO CONTROLS (AT INTERSECTION)',
+    'CROSSING - AGAINST SIGNAL',
+    'CROSSING - CONTROLS PRESENT (NOT AT INTERSECTION)',
+    'UNKNOWN/NA',
+    'STANDING IN ROADWAY',
+    'WITH TRAFFIC'
+])]
+```
+
+```{python}
+alt.data_transformers.enable("vegafusion")
+#plot number of severe ped crashes by action
+alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian").mark_bar().encode(
+    x=alt.X('PEDPEDAL_ACTION:O', sort='y', axis=alt.Axis(title= 'Action of Pedestrian', labelFontSize=6, labelAngle=60)),
+    y=alt.Y("sum(n_peds_severe):Q", axis=alt.Axis(title= 'Number'))
+)
+```
+
+
+=======
+>>>>>>> main
+>>>>>>> alison
 ## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
 #load road and community area data
@@ -196,3 +234,12 @@ top_roads = top_roads.rename(
 
 print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
 ```
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> main
+>>>>>>> alison

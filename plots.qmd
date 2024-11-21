@@ -68,8 +68,8 @@ alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Act
 ## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
 #load road and community area data
-roads = pd.read_csv("Data/chicago_roads.csv")
-comm_areas = pd.read_csv("Data/CommAreas.csv")
+roads = pd.read_csv("Data/Raw/chicago_roads.csv")
+comm_areas = pd.read_csv("Data/Raw/CommAreas.csv")
 
 #create geometry column to turn roads csv into geopandas object
 roads["geometry"] = roads["the_geom"].apply(wkt.loads)
@@ -77,6 +77,7 @@ roads_gdf = gpd.GeoDataFrame(roads, geometry="geometry")
 roads_gdf = roads_gdf.set_crs("EPSG:4326", inplace=True)
 
 #create geometry column to turn ped crashes df geopandas object
+ped_crashes["geometry"] = ped_crashes["geometry"].apply(wkt.loads)
 ped_crashes_gdf = gpd.GeoDataFrame(ped_crashes, geometry="geometry")
 ped_crashes_gdf = ped_crashes_gdf.set_crs("EPSG:4326", inplace=True)
 

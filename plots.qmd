@@ -12,6 +12,63 @@ import altair as alt
 import matplotlib.pyplot as plt
 import contextily as ctx
 
+
+crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
+people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")
+```
+
+
+```{python}
+#basic cleaning for crashes data
+
+#recode posted speed limits =99 as missing (affects 0.008% of obs)
+crashes["POSTED_SPEED_LIMIT"] = crashes["POSTED_SPEED_LIMIT"].apply(
+    lambda x: np.nan if x == 99 else x)
+
+#define speed limit bins and labels
+bins = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75]
+labels = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75]
+
+#assign each value to the correct bin
+crashes["binned_posted_speed"] = pd.cut(crashes["POSTED_SPEED_LIMIT"], 
+                                        bins=bins, 
+                                        labels=labels, 
+                                        right=True)
+
+#drop missing and outlier locations
+crashes = crashes[crashes["LATITUDE"] != 0]
+crashes = crashes[crashes["LOCATION"].notna()]
+
+#create geometry column to turn into geopandas object
+crashes["geometry"] = crashes["LOCATION"].apply(wkt.loads)
+crashes_gdf = gpd.GeoDataFrame(crashes, geometry="geometry")
+
+#set crs
+crashes_gdf = crashes_gdf.set_crs("EPSG:4326", inplace=True)
+```
+
+```{python}
+#clean people data to get pedestrians
+ped_data = people.loc[people["PERSON_TYPE"]=="PEDESTRIAN"]
+
+#keep severe crashes
+ped_data_severe = ped_data.loc[(ped_data["INJURY_CLASSIFICATION"]=="INCAPACITATING INJURY") |
+                                (ped_data["INJURY_CLASSIFICATION"]=="FATAL")]
+
+#count number of pedestrians involved per each unique crash id
+ped_crashes = ped_data["CRASH_RECORD_ID"].value_counts().reset_index()
+ped_crashes = ped_crashes.rename({"count":"n_peds_total"}, axis=1)
+
+#count number of pedestrians with severe injuries per each unique crash id
+ped_severe_crashes = ped_data_severe["CRASH_RECORD_ID"].value_counts().reset_index()
+ped_severe_crashes = ped_severe_crashes.rename({"count":"n_peds_severe"}, axis=1)
+
+#merge counts
+ped_counts = pd.merge(ped_crashes, ped_severe_crashes, on="CRASH_RECORD_ID", how="left")
+
+#merge into crash data
+ped_crashes = pd.merge(crashes, ped_counts, on="CRASH_RECORD_ID", how="inner")
+=======
 ped_crashes = pd.read_csv("Data/Clean/ped_crashes.csv")
 ```
 
@@ -27,7 +84,7 @@ severe_crashes_by_speed["share_severe"] = severe_crashes_by_speed[
 
 ```{python}
 #plot share of severe ped crashes by posted speed limit
-alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
+alt.Chart(severe_crashes_by_speed).mark_bar(color="olivedrab", opacity=0.85
 ).transform_filter(alt.datum.binned_posted_speed < 50
 ).encode(
     x=alt.X("binned_posted_speed:O", title="Posted Speed Limit"),
@@ -38,6 +95,9 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
 ```
 
 ```{python}
+#merge pedestrian actions into crash data
+ped_actions = people[['PEDPEDAL_ACTION', 'CRASH_RECORD_ID']]
+ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="inner")
 ped_action = ped_crashes[ped_crashes['n_peds_total']==1]
 
 #subset to tope ten actions 
@@ -58,9 +118,9 @@ ped_action = ped_action[ped_action['PEDPEDAL_ACTION'].isin([
 ```{python}
 alt.data_transformers.enable("vegafusion")
 #plot number of severe ped crashes by action
-alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian").mark_bar().encode(
-    x=alt.X('PEDPEDAL_ACTION:O', sort='y', axis=alt.Axis(title= 'Action of Pedestrian', labelFontSize=6, labelAngle=60)),
-    y=alt.Y("sum(n_peds_severe):Q", axis=alt.Axis(title= 'Number'))
+alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian").mark_bar(color="seagreen", opacity=0.85).encode(
+    x=alt.Y("sum(n_peds_severe):Q", axis=alt.Axis(title= 'Number')),
+    y=alt.X('PEDPEDAL_ACTION:O', sort='x', axis=alt.Axis(title= 'Action of Pedestrian', labelFontSize=6))
 )
 ```
 
@@ -169,4 +229,4 @@ top_roads = top_roads.rename(
     "binned_posted_speed":"Speed Limit"}, axis=1)
 
 print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
-```
+

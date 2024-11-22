@@ -47,8 +47,18 @@ app_ui = ui.page_sidebar(
 
 def server(input, output, session):
      @reactive.calc
-     def roads_list():
+     def roads_full():
           df = roads
+          return df
+     
+     @reactive.calc
+     def crashes_full():
+          df = crashes
+          return df
+     
+     @reactive.calc
+     def comm_full():
+          df = community
           return df
         
      @reactive.calc
@@ -88,6 +98,19 @@ def server(input, output, session):
                "n_peds_sev"]/severe_crashes_by_road["n_peds_tot"]
           road_df = pd.merge(road_df, severe_crashes_by_road, on="STREET_NAM", how="left")
           return road_df
+        
+     @reactive.calc
+     def crashes_by_community():
+        comm_df = comm_full()
+        crash_df = crashes_full()
+        #group by street and calculate number of crashes
+        severe_crashes_by_comm = crash_df.groupby("COMMUNITY")[
+            ["n_peds_tot", "n_peds_sev"]].sum().reset_index()
+        #calculate share of severe ped crashes by speed
+        severe_crashes_by_comm["share_severe"] = severe_crashes_by_comm[
+            "n_peds_sev"]/severe_crashes_by_comm["n_peds_tot"]
+        comm_df = pd.merge(comm_df, severe_crashes_by_comm, on="COMMUNITY", how="left")
+        return comm_df
 
      @reactive.calc
      def top_roads():
@@ -103,8 +126,7 @@ def server(input, output, session):
                "n_peds_sev"]/severe_crashes_by_road["n_peds_tot"]
           return severe_crashes_by_road
 
-          
-    
+
      def mode(series):
           return series.mode().iloc[0] if not series.mode().empty else None
 
@@ -145,12 +167,30 @@ def server(input, output, session):
           legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
           ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron)
           ax.set_axis_off()
-          ax.set_title(f"Roadway Locations of Severe Pedestrian Crashes in {input.neighborhood()}", fontsize=14)
+          ax.set_title(f"Roadway Locations of Severe Pedestrian Crashes in {input.neighborhood()}", fontsize=10)
+          return fig
+     
+     @render.plot
+     def neighborhood_plot():
+          comm_areas = crashes_by_community()
+          comm_areas_singular = community_data()
+        
+          #reproject communities so basemap plots correctly
+          comm_areas = comm_areas.to_crs(epsg=3857)
+          comm_areas_singular = comm_areas_singular.to_crs(epsg=3857)
+
+          #plot communities by severe ped crashes
+          fig, ax = plt.subplots(figsize=(5, 5))
+          comm_areas_singular.plot(ax=ax, facecolor="none", edgecolor="blue", linewidth=4)
+          comm_areas.plot(column="n_peds_sev", legend=True, cmap="RdYlGn_r", ax=ax,
+          legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
+          ax.set_axis_off()
+          ax.set_title(f"Severe Pedestrian Crashes by Chicago Neighborhood", fontsize=10)
           return fig
 
      @reactive.effect
      def _():
-          neighborhood_list = roads_list()["community_fixed"].dropna().unique().tolist()
+          neighborhood_list = roads_full()["community_fixed"].dropna().unique().tolist()
           neighborhood_list = sorted(neighborhood_list)
           ui.update_select("neighborhood", choices=neighborhood_list)
     

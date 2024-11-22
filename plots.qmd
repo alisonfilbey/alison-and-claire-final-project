@@ -12,8 +12,8 @@ import altair as alt
 import matplotlib.pyplot as plt
 import contextily as ctx
 
-crashes = pd.read_csv("Data/Traffic_Crashes_Crashes.csv")
-people = pd.read_csv("Data/Traffic_Crashes_People.csv")
+crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
+people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")
 ```
 
 
@@ -81,7 +81,7 @@ severe_crashes_by_speed["share_severe"] = severe_crashes_by_speed[
 
 ```{python}
 #plot share of severe ped crashes by posted speed limit
-alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
+alt.Chart(severe_crashes_by_speed).mark_bar(color="olivedrab", opacity=0.85
 ).transform_filter(alt.datum.binned_posted_speed < 50
 ).encode(
     x=alt.X("binned_posted_speed:O", title="Posted Speed Limit"),
@@ -91,9 +91,8 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="green", opacity=0.85
         height=300, width=300)
 ```
 
-<<<<<<< HEAD
 ```{python}
-merge pedestrian actions into crash data
+#merge pedestrian actions into crash data
 ped_actions = people[['PEDPEDAL_ACTION', 'CRASH_RECORD_ID']]
 ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="inner")
 
@@ -117,15 +116,13 @@ ped_action = ped_action[ped_action['PEDPEDAL_ACTION'].isin([
 ```{python}
 alt.data_transformers.enable("vegafusion")
 #plot number of severe ped crashes by action
-alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian").mark_bar().encode(
-    x=alt.X('PEDPEDAL_ACTION:O', sort='y', axis=alt.Axis(title= 'Action of Pedestrian', labelFontSize=6, labelAngle=60)),
-    y=alt.Y("sum(n_peds_severe):Q", axis=alt.Axis(title= 'Number'))
+alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian").mark_bar(color="seagreen", opacity=0.85).encode(
+    x=alt.Y("sum(n_peds_severe):Q", axis=alt.Axis(title= 'Number')),
+    y=alt.X('PEDPEDAL_ACTION:O', sort='x', axis=alt.Axis(title= 'Action of Pedestrian', labelFontSize=6))
 )
 ```
 
 
-=======
->>>>>>> main
 ## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
 #load road and community area data
@@ -231,9 +228,6 @@ top_roads = top_roads.rename(
 
 print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
 ```
-<<<<<<< HEAD
 
 
 
-=======
->>>>>>> main

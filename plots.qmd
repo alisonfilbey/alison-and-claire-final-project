@@ -12,6 +12,7 @@ import altair as alt
 import matplotlib.pyplot as plt
 import contextily as ctx
 
+
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
 people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")
 ```
@@ -67,6 +68,8 @@ ped_counts = pd.merge(ped_crashes, ped_severe_crashes, on="CRASH_RECORD_ID", how
 
 #merge into crash data
 ped_crashes = pd.merge(crashes, ped_counts, on="CRASH_RECORD_ID", how="inner")
+=======
+ped_crashes = pd.read_csv("Data/Clean/ped_crashes.csv")
 ```
 
 ```{python}
@@ -95,7 +98,6 @@ alt.Chart(severe_crashes_by_speed).mark_bar(color="olivedrab", opacity=0.85
 #merge pedestrian actions into crash data
 ped_actions = people[['PEDPEDAL_ACTION', 'CRASH_RECORD_ID']]
 ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="inner")
-
 ped_action = ped_crashes[ped_crashes['n_peds_total']==1]
 
 #subset to tope ten actions 
@@ -126,8 +128,8 @@ alt.Chart(ped_action, title= "Number of Crashes Involving Pedestrians by the Act
 ## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
 #load road and community area data
-roads = pd.read_csv("Data/chicago_roads.csv")
-comm_areas = pd.read_csv("Data/CommAreas.csv")
+roads = pd.read_csv("Data/Raw/chicago_roads.csv")
+comm_areas = pd.read_csv("Data/Raw/CommAreas.csv")
 
 #create geometry column to turn roads csv into geopandas object
 roads["geometry"] = roads["the_geom"].apply(wkt.loads)
@@ -135,6 +137,7 @@ roads_gdf = gpd.GeoDataFrame(roads, geometry="geometry")
 roads_gdf = roads_gdf.set_crs("EPSG:4326", inplace=True)
 
 #create geometry column to turn ped crashes df geopandas object
+ped_crashes["geometry"] = ped_crashes["geometry"].apply(wkt.loads)
 ped_crashes_gdf = gpd.GeoDataFrame(ped_crashes, geometry="geometry")
 ped_crashes_gdf = ped_crashes_gdf.set_crs("EPSG:4326", inplace=True)
 
@@ -143,7 +146,6 @@ comm_areas["geometry"] = comm_areas["the_geom"].apply(wkt.loads)
 comm_areas_gdf = gpd.GeoDataFrame(comm_areas, geometry="geometry")
 comm_areas_gdf = comm_areas_gdf.set_crs("EPSG:4326", inplace=True)
 ```
-
 
 ```{python}
 #subset to hyde park
@@ -227,7 +229,4 @@ top_roads = top_roads.rename(
     "binned_posted_speed":"Speed Limit"}, axis=1)
 
 print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
-```
-
-
 

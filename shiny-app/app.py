@@ -1,9 +1,11 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import geopandas as gpd
 from shapely import wkt
 import numpy as np
 import contextily as ctx
+import mplcursors
 
 # Load data and fix community column
 roads = gpd.read_file("shiny-app/roads.shp")
@@ -34,7 +36,7 @@ app_ui = ui.page_sidebar(
             full_screen=True,
         ),
         ui.card(
-            ui.card_header("Chicago Neighborhoods by Number of Pedestrians Severely Injured In Crash"),
+            ui.card_header("Chicago neighborhoods by number of pedestrians severely injured In crash"),
             ui.output_plot("neighborhood_plot"),
             full_screen=True,
         ),
@@ -82,7 +84,7 @@ def server(input, output, session):
 
      @render.text
      def community_map_label():
-         return f"Roadway locations of severe pedestrian crashes in {input.neighborhood()}"
+         return f"Number of pedestrians severely injured in crash by roadway in {input.neighborhood()}"
 
      @reactive.calc
      def crashes_by_road():
@@ -103,13 +105,14 @@ def server(input, output, session):
      def crashes_by_community():
         comm_df = comm_full()
         crash_df = crashes_full()
+        
         #group by street and calculate number of crashes
-        severe_crashes_by_comm = crash_df.groupby("COMMUNITY")[
+        severe_crashes_by_comm = crash_df.groupby("community_fixed")[
             ["n_peds_tot", "n_peds_sev"]].sum().reset_index()
         #calculate share of severe ped crashes by speed
         severe_crashes_by_comm["share_severe"] = severe_crashes_by_comm[
             "n_peds_sev"]/severe_crashes_by_comm["n_peds_tot"]
-        comm_df = pd.merge(comm_df, severe_crashes_by_comm, on="COMMUNITY", how="left")
+        comm_df = pd.merge(comm_df, severe_crashes_by_comm, on="community_fixed", how="left")
         return comm_df
 
      @reactive.calc
@@ -164,16 +167,17 @@ def server(input, output, session):
           fig, ax = plt.subplots(figsize=(5, 5))
           comm_areas.plot(ax=ax, facecolor="none", edgecolor="black")
           roads.plot(column="n_peds_sev", legend=True, cmap="RdYlGn_r", ax=ax,
-          legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
+          legend_kwds={"label": "", "orientation": "vertical"})
           ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron)
           ax.set_axis_off()
-          ax.set_title(f"Roadway Locations of Severe Pedestrian Crashes in {input.neighborhood()}", fontsize=10)
+          ax.set_title(f"Number of Severe Pedestrian Crashes by Roadway in {input.neighborhood()}", fontsize=10)
           return fig
      
      @render.plot
      def neighborhood_plot():
           comm_areas = crashes_by_community()
-          comm_areas_singular = community_data()
+          comm_areas_singular = crashes_by_community()[
+               crashes_by_community()['community_fixed'] == input.neighborhood()]
         
           #reproject communities so basemap plots correctly
           comm_areas = comm_areas.to_crs(epsg=3857)
@@ -181,11 +185,14 @@ def server(input, output, session):
 
           #plot communities by severe ped crashes
           fig, ax = plt.subplots(figsize=(5, 5))
-          comm_areas_singular.plot(ax=ax, facecolor="none", edgecolor="blue", linewidth=4)
-          comm_areas.plot(column="n_peds_sev", legend=True, cmap="RdYlGn_r", ax=ax,
-          legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
+          comm_areas_plot = comm_areas.plot(column="n_peds_sev", legend=True, cmap="RdYlGn_r", ax=ax,
+               legend_kwds={"label": "", "orientation": "vertical"})
+          comm_areas_singular.plot(ax=ax, facecolor="none", edgecolor="blue", linewidth=2)
+          blue_line = mlines.Line2D([], [], color="blue", linewidth=2, label=f"{input.neighborhood()}")
+         
+          ax.legend(handles=[blue_line], loc="lower left")
           ax.set_axis_off()
-          ax.set_title(f"Severe Pedestrian Crashes by Chicago Neighborhood", fontsize=10)
+          ax.set_title("Number of Severe Pedestrian Crashes by Chicago Neighborhood", fontsize=10)
           return fig
 
      @reactive.effect

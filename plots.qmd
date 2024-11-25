@@ -36,7 +36,7 @@ speed_chart = alt.Chart(severe_crashes_by_speed).mark_bar(color="seagreen", opac
 ).properties(title={
         "text": ["Severe or Fatal Pedestrian Injuries", "by Posted Speed Limit"]},
         height=300, width=300)
-speed_chart.save("Pictures/severe_ped_by_speed.png")
+speed_chart.save("Pictures/severe_ped_by_speed.png", scale_factor=3)
 ```
 
 ```{python}
@@ -69,7 +69,7 @@ ped_act_chart = alt.Chart(ped_action).mark_bar(color="seagreen", opacity=0.85).e
     y=alt.X('PEDPEDAL_ACTION:O', sort='x', axis=alt.Axis(title= 'Action of Pedestrian',         
         labelFontSize=6))
 ).properties(title= "Number of Crashes Involving Pedestrians by the Action of the Pedestrian")
-ped_act_chart.save("Pictures/severe_ped_by_action.png")
+ped_act_chart.save("Pictures/severe_ped_by_action.png", scale_factor=3)
 ```
 
 ```{python}
@@ -128,5 +128,5 @@ cause_plot = alt.Chart(severe_crashes_by_cause).mark_bar(color="seagreen", opaci
     y=alt.Y("updated_cause", title="", sort="-x"),
     x=alt.X("share_severe", title="Share of Pedestrian Involved Crashes (%)")
 ).properties(title="Severe or Fatal Pedestrian Injuries by Cause of Crash", height=300, width=300)
-cause_plot.save("Pictures/severe_ped_by_crash_cause.png")
+cause_plot.save("Pictures/severe_ped_by_crash_cause.png", scale_factor=3)
 ```

@@ -72,109 +72,61 @@ ped_act_chart = alt.Chart(ped_action).mark_bar(color="seagreen", opacity=0.85).e
 ped_act_chart.save("Pictures/severe_ped_by_action.png")
 ```
 
-
-## CREATING EXAMPLE MAP OF HYDE PARK
 ```{python}
-#load road and community area data
-roads = pd.read_csv("Data/Raw/chicago_roads.csv")
-comm_areas = pd.read_csv("Data/Raw/CommAreas.csv")
+#create dictionary for new values of crash cause
+crash_cause_xwalk = {"CELL PHONE USE OTHER THAN TEXTING":"Distraction", 
+    "DISTRACTION - FROM INSIDE VEHICLE":"Distraction", "DISTRACTION - FROM OUTSIDE VEHICLE":
+    "Distraction", "DISTRACTION - OTHER ELECTRONIC DEVICE (NAVIGATION DEVICE, DVD PLAYER, ETC.)":
+    "Distraction", "TEXTING":"Distraction", "DISREGARDING OTHER TRAFFIC SIGNS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING ROAD MARKINGS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING STOP SIGN":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING TRAFFIC SIGNALS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING YIELD SIGN":
+    "Disregard of Traffic Signs/Signals", "FAILING TO YIELD RIGHT-OF-WAY":
+    "Disregard of Traffic Signs/Signals", "RELATED TO BUS STOP":
+    "Disregard of Traffic Signs/Signals", "TURNING RIGHT ON RED":
+    "Disregard of Traffic Signs/Signals", 
+    "UNDER THE INFLUENCE OF ALCOHOL/DRUGS (USE WHEN ARREST IS EFFECTED)": 
+    "Under the Influence", "HAD BEEN DRINKING (USE WHEN ARREST IS NOT MADE)":"Under the Influence",
+    "PHYSICAL CONDITION OF DRIVER": "Under the Influence", "EXCEEDING AUTHORIZED SPEED LIMIT":
+    "Speeding", "EXCEEDING SAFE SPEED FOR CONDITIONS": "Speeding", 
+    "FAILING TO REDUCE SPEED TO AVOID CRASH": "Speeding", 
+    "OPERATING VEHICLE IN ERRATIC, RECKLESS, CARELESS, NEGLIGENT OR AGGRESSIVE MANNER":
+    "Reckless/poor driving", "DRIVING ON WRONG SIDE/WRONG WAY":"Reckless/poor driving", 
+    "FOLLOWING TOO CLOSELY":"Reckless/poor driving", "IMPROPER BACKING":"Reckless/poor driving",
+    "IMPROPER LANE USAGE":"Reckless/poor driving", "IMPROPER OVERTAKING/PASSING":
+    "Reckless/poor driving", "IMPROPER TURNING/NO SIGNAL":"Reckless/poor driving", 
+    "PASSING STOPPED SCHOOL BUS":"Reckless/poor driving", 
+    "DRIVING SKILLS/KNOWLEDGE/EXPERIENCE":"Reckless/poor driving", 
+    "ANIMAL":"Obstruction", "OBSTRUCTED CROSSWALKS":"Obstruction", 
+    "VISION OBSCURED (SIGNS, TREE LIMBS, BUILDINGS, ETC.)":"Obstruction", 
+    "BICYCLE ADVANCING LEGALLY ON RED LIGHT":"Obstruction", 
+    "EVASIVE ACTION DUE TO ANIMAL, OBJECT, NONMOTORIST":"Obstruction", 
+    "ROAD CONSTRUCTION/MAINTENANCE":"Exterior condition", 
+    "ROAD ENGINEERING/SURFACE/MARKING DEFECTS":"Exterior condition", 
+    "WEATHER":"Exterior condition", "EQUIPMENT - VEHICLE CONDITION":"Exterior condition", 
+    "NOT APPLICABLE":"Unclassified", "UNABLE TO DETERMINE":"Unclassified"}
 
-#create geometry column to turn roads csv into geopandas object
-roads["geometry"] = roads["the_geom"].apply(wkt.loads)
-roads_gdf = gpd.GeoDataFrame(roads, geometry="geometry")
-roads_gdf = roads_gdf.set_crs("EPSG:4326", inplace=True)
-
-#create geometry column to turn ped crashes df geopandas object
-ped_crashes["geometry"] = ped_crashes["geometry"].apply(wkt.loads)
-ped_crashes_gdf = gpd.GeoDataFrame(ped_crashes, geometry="geometry")
-ped_crashes_gdf = ped_crashes_gdf.set_crs("EPSG:4326", inplace=True)
-
-#create geometry column to turn community areas csv into geopandas object
-comm_areas["geometry"] = comm_areas["the_geom"].apply(wkt.loads)
-comm_areas_gdf = gpd.GeoDataFrame(comm_areas, geometry="geometry")
-comm_areas_gdf = comm_areas_gdf.set_crs("EPSG:4326", inplace=True)
+#replace new type variable
+ped_crashes["updated_cause"] = ped_crashes["PRIM_CONTRIBUTORY_CAUSE"].replace(crash_cause_xwalk)
 ```
 
 ```{python}
-#subset to hyde park
-comm_areas_gdf = comm_areas_gdf.loc[comm_areas_gdf["COMMUNITY"]=="HYDE PARK"]
-
-#subset roads and crashes to hyde park with spatial join
-hp_roads_gdf = gpd.sjoin(roads_gdf, comm_areas_gdf, how="inner")
-hp_crashes_gdf = gpd.sjoin(ped_crashes_gdf, comm_areas_gdf, how="inner")
-```
-
-```{python}
-#define buffer distance around each road so that crash points lie within buffer
-buffer_distance = 0.00025
-
-#create buffer around roads for spatial join
-hp_roads_gdf["buffer"] = hp_roads_gdf.geometry.buffer(buffer_distance)
-
-#create new geodataframe for buffers
-buffered_gdf = hp_roads_gdf.set_geometry("buffer")
-```
-
-```{python}
-#spatial join crashes with buffers to get street name where crash occured
-buffered_gdf = buffered_gdf.drop(['index_right'], axis=1)
-hp_crashes_gdf = hp_crashes_gdf.drop(['index_right'], axis=1)
-hp_crashes_gdf = gpd.sjoin(hp_crashes_gdf, buffered_gdf, how="left", predicate="within")
-```
-
-```{python}
-#group by street and calculate number of crashes
-severe_crashes_by_road = hp_crashes_gdf.groupby("STREET_NAM")[
+#collapse by cause of crash
+severe_crashes_by_cause = ped_crashes.groupby("updated_cause")[
     ["n_peds_total", "n_peds_severe"]].sum().reset_index()
 
-#calculate share of severe ped crashes by speed
-severe_crashes_by_road["share_severe"] = severe_crashes_by_road[
-    "n_peds_severe"]/severe_crashes_by_road["n_peds_total"]
-hp_roads_gdf = pd.merge(hp_roads_gdf, severe_crashes_by_road, on="STREET_NAM", how="left")
+#calculate share of severe ped crashes by cause
+severe_crashes_by_cause["share_severe"] = severe_crashes_by_cause[
+    "n_peds_severe"]/severe_crashes_by_cause["n_peds_total"]
 ```
 
 ```{python}
-#reproject so that the data can plot with the basemap
-comm_areas_gdf = comm_areas_gdf.to_crs(epsg=3857)
-hp_roads_gdf = hp_roads_gdf.to_crs(epsg=3857)
-
-fig, ax = plt.subplots(figsize=(10, 8))
-
-#plot the community areas with transparent fill and black outline
-comm_areas_gdf.plot(ax=ax, facecolor="none", edgecolor="black")
-
-#plot the roads colored by the number of severe pedestrian crashes
-hp_roads_gdf.plot(column="n_peds_severe", legend=True, cmap="RdYlGn_r", ax=ax,
-                  legend_kwds={"label": "Number of Severe Pedestrian Crashes", "orientation": "horizontal"})
-
-#add basemap
-ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron)
-
-ax.set_axis_off()
-ax.set_title("Roadway Locations of Severe Pedestrian Crashes in Hyde Park", fontsize=14)
-plt.show()
+#plot share of severe ped crashes by posted cause of crash
+cause_plot = alt.Chart(severe_crashes_by_cause).mark_bar(color="seagreen", opacity=0.85
+).encode(
+    y=alt.Y("updated_cause", title="", sort="-x"),
+    x=alt.X("share_severe", title="Share of Pedestrian Involved Crashes (%)")
+).properties(title="Severe or Fatal Pedestrian Injuries by Cause of Crash", height=300, width=300)
+cause_plot.save("Pictures/severe_ped_by_crash_cause.png")
 ```
-
-```{python}
-#get summary statistics of crashes in the neighborhood
-
-#function to find mode of a column
-def mode(series):
-    return series.mode().iloc[0] if not series.mode().empty else None
-
-#group by street and find the most frequent speed limit
-most_frequent_speed = hp_crashes_gdf.groupby("STREET_NAM")[
-    "binned_posted_speed"].apply(mode).reset_index()
-
-#find roads with most severe ped crashes
-top_roads = severe_crashes_by_road.sort_values(by="n_peds_severe", ascending=False)[["STREET_NAM", "n_peds_severe"]].head(3)
-
-#merge with speed limit
-top_roads = pd.merge(top_roads, most_frequent_speed, on="STREET_NAM", how="left")
-top_roads = top_roads.rename(
-    {"STREET_NAM":"Street Name", 
-    "n_peds_severe":"Number of Severe Ped Crashes",
-    "binned_posted_speed":"Speed Limit"}, axis=1)
-
-print("The most dangerous roads in Hyde Park for Pedestrians are: \n", top_roads)
-

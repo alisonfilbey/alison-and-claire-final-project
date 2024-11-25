@@ -8,3 +8,4 @@
 *.cpg
 *.txt
 *.venv
+*venv

@@ -8,6 +8,7 @@ format: html
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
+import numpy as np
 
 #load raw crash and people data
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")

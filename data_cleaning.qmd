@@ -72,7 +72,8 @@ ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="left
 
 #keep relevant columns 
 ped_crashes = ped_crashes[["CRASH_RECORD_ID", "PEDPEDAL_ACTION", "binned_posted_speed",
-                            "n_peds_total", "n_peds_severe", "LATITUDE", "LONGITUDE", "geometry"]]
+                            "n_peds_total", "n_peds_severe", "PRIM_CONTRIBUTORY_CAUSE",
+                            "LATITUDE", "LONGITUDE", "geometry"]]
 
 #output cleaned csv
 ped_crashes.to_csv("Data/Clean/ped_crashes.csv", index=False)

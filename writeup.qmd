@@ -1,0 +1,30 @@
+---
+title: "Pedestrian Safety on Chicago Roads"
+authors: "Alison Filbey (Section 4; alisonfilbey) and Claire Conzelmann (Section 4; claireconzelmann)"
+date: "today"
+format:
+  html: default
+---
+
+## Introduction
+Over the past decade, traffic fatalities among pedestrians and bicyclists have increased substantially in Northeastern Illinois. In 2014, there were 400 pedestrian fatalities in this region; in 2023, the number of pedestrian fatalities had increased to nearly 600 ([CMAP 2024](https://cmap.illinois.gov/wp-content/uploads/dlm_uploads/Speed-Management-Executive-Summary_CMAP_2024.pdf)). Due to this rise in traffic fatalities, the state of Illinois is considering lowering the statutory speed limit in urban areas from 30 mph to 25 mph. If adopted, this measure would decrease the speed limit on most city roads within Chicago.
+
+Using traffic crash report data from the city of Chicago, our project seeks to answer two main questions:
+
+- Does the crash report data suggest that lowering the statutory speed limit from 30 mph to 25 mph would reduce severe pedestrian involved crashes?
+- Are there other ways the city of Chicago can reduce severe pedestrian injuries resulting from crashes?
+
+## Data and Methods
+To conduct our analyses, we use the Traffic Crashes datasets from [The Chicago Data Portal](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data). Specifically, we use the crashes dataset, which has information on traffic crashes from September 2017-October 2024. The crahses dataset is at the crash record level and includes information such as the location of the crash, the cause of the crash, and the speed limit on the road of the crash. We also use the people dataset, which contains information on the people (both within and external to the vehicle) involved in each crash and the injuries they sustained. Because it is at the person level, there are multiple observations per crash. Lastly, we use the Chicago roads shapefile and the Chicago community area shapefile, also from the Chicago Data Portal.
+
+Because previous research suggests that severe and fatal pedestrian traffic crash injuries have increased in recent years, we focus our analysis on these specific crashes. To do so, we first subset the people dataset to observations where the person type is coded as "pedestrian". To calculate severe pedestrian crashes, we subset our people dataset to pedestrians who had an injury classification coded as "incapacitating injury" or "fatal". We aggregate both the pedestrian and severe pedestrian subsets to the crash level by counting the total number of observations (pedestrians) belonging to each crash record. We then merge both subsets to the crash dataset on the unique crash record id. Some of our analyses look at the share of pedestrian crashes that caused severe injuries. To calculate the share, we simply divide the number of severe pedestrian injuries by the total number of pedestrians invovled in crashes (at some level of aggregation, such as posted speed limit, road, etc.).
+
+For the Shiny app, we calculate the number of severe crashes on each road within a neighborhood. To do so, we first spatially join the community area shapefile to the road shapefile so that we can join the community area name to the roads. Then, we subset the road and community area geodataframes to the community area inputted by the user. To join the road names in the road data to the crash points in our crash data, we first create a 0.00025 degree buffer around each road. Then, we spatially join the crash data to the road buffers using the "within" method. The buffer allows us to capture the crash points that happen along a given road. We then group by the road name and calculate the number of crashes on each road. To calculate the number of sever crashes within each neighborhood, we spatially join the community areas to the crash data, so that we can join the community area name to each crash point. This allows us to subset to the inputted community area, group by community area, and count the number of crashes within each area.
+
+## Results
+
+## Recommendations
+
+## Conclusion
+
+## References

@@ -9,3 +9,4 @@
 *.txt
 *.venv
 *venv
+*writeup_files

@@ -1,12 +1,4 @@
-*.csv
-*.dbf
-*.prj
-*.shp
-*.shx
-*.xml
 *.DS_Store
-*.cpg
-*.txt
 *.venv
 *venv
 *writeup_files

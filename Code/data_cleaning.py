@@ -1,10 +1,16 @@
-#loading packages
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 import numpy as np
 
 #load raw crash and people data
+'''
+These raw files are too large to publish on github. They can be downloaded from the links below. Note that the files are frequently updated by the City and may have been updated since we downloaded them in October, which may yield slightly different results than our results.
+
+crashes dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data
+
+people dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-People/u6pd-qa9d/about_data
+'''
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
 people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")
 

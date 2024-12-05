@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import contextily as ctx
 
 ped_crashes = pd.read_csv("Data/Clean/ped_crashes.csv")
+
 #collapse by speed limit bin
 severe_crashes_by_speed = ped_crashes.groupby("binned_posted_speed")[
     ["n_peds_total", "n_peds_severe"]].sum().reset_index()
@@ -26,6 +27,7 @@ speed_chart = alt.Chart(severe_crashes_by_speed).mark_bar(color="seagreen", opac
         height=300, width=300)
 speed_chart.save("Pictures/severe_ped_by_speed.png", scale_factor=3)
 
+#subset to crashes with only 1 pedestrian involved so we attribute the action to 1 person
 ped_action = ped_crashes[ped_crashes['n_peds_total']==1]
 
 #subset to top ten actions 
@@ -46,7 +48,6 @@ ped_action = ped_action[ped_action['PEDPEDAL_ACTION'].isin([
 ped_action = ped_action.groupby("PEDPEDAL_ACTION")["n_peds_severe"].sum(
     ).reset_index(name="n_peds_total")
 
-#alt.data_transformers.enable("vegafusion")
 #plot number of severe ped crashes by action
 ped_act_chart = alt.Chart(ped_action).mark_bar(color="seagreen", opacity=0.85).encode(
     x=alt.Y("n_peds_total", axis=alt.Axis(title= "")),

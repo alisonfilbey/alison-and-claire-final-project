@@ -118,6 +118,6 @@ ped_crashes_gdf = gpd.sjoin(ped_crashes_gdf, buffered_gdf, how="left", predicate
 roads_gdf = roads_gdf.drop(["buffer"], axis=1)
 
 #output shapefiles
-ped_crashes_gdf.to_file("shiny-app/ped_crashes.shp")
-comm_areas_gdf.to_file("shiny-app/comm_areas.shp")
-roads_gdf.to_file("shiny-app/roads.shp")
+ped_crashes_gdf.to_file("shiny-app/Data/ped_crashes.shp")
+comm_areas_gdf.to_file("shiny-app/Data/comm_areas.shp")
+roads_gdf.to_file("shiny-app/Data/roads.shp")

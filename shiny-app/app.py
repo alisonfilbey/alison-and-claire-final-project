@@ -8,9 +8,9 @@ import contextily as ctx
 import mplcursors
 
 # Load data and fix community column
-roads = gpd.read_file("shiny-app/roads.shp")
-crashes = gpd.read_file("shiny-app/ped_crashes.shp")
-community = gpd.read_file("shiny-app/comm_areas.shp")
+roads = gpd.read_file("shiny-app/Data/roads.shp")
+crashes = gpd.read_file("shiny-app/Data/ped_crashes.shp")
+community = gpd.read_file("shiny-app/Data/comm_areas.shp")
 
 roads['community_fixed'] = roads['COMMUNITY'].astype(str).str.strip()
 crashes['community_fixed'] = crashes['COMMUNITY'].astype(str).str.strip()

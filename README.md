@@ -14,3 +14,6 @@ To replicate our findings, run the code located in this repository in the follow
 1. ...**Code/data_cleaning.py**
 2. ...**Code/plots.py**
 
+## Run our App:
+After running ...**Code/data_cleaning.py**, load our shiny app located at ...**shiny-app/app.py** to view our dashboard that displays the locations of severe pedestrian crashes throughout Chicago neighborhoods.
+

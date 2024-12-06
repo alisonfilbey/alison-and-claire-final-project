@@ -1,10 +1,5 @@
 import pandas as pd
-import geopandas as gpd
-from shapely import wkt
-import numpy as np
 import altair as alt
-import matplotlib.pyplot as plt
-import contextily as ctx
 
 ped_crashes = pd.read_csv("Data/Clean/ped_crashes.csv")
 

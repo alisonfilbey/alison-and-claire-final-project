@@ -48,7 +48,8 @@ ped_act_chart = alt.Chart(ped_action).mark_bar(color="seagreen", opacity=0.85).e
     x=alt.Y("n_peds_total", axis=alt.Axis(title= "")),
     y=alt.X('PEDPEDAL_ACTION:O', sort='x', axis=alt.Axis(title= 'Action of Pedestrian',         
         labelFontSize=6))
-).properties(title= "Number of Crashes with Severe or Fatal Pedestrian Injuries by the Action of the Pedestrian")
+).properties(title={
+        "text": ["Number of Crashes with Severe Pedestrian Injuries", "by Action of the Pedestrian"]})
 ped_act_chart.save("Pictures/severe_ped_by_action.png", scale_factor=3)
 
 #create dictionary for new values of crash cause

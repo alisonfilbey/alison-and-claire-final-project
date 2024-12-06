@@ -5,11 +5,9 @@ import numpy as np
 
 #load raw crash and people data
 '''
-These raw files are too large to publish on github. They can be downloaded from the links below. Note that the files are frequently updated by the City and may have been updated since we downloaded them in October, which may yield slightly different results than our results.
+These raw files are too large to publish on github. They can be downloaded from the Google Drive folder linked below.
 
-crashes dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data
-
-people dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-People/u6pd-qa9d/about_data
+https://drive.google.com/drive/folders/16oqPjuMoqH9tWm7X-AmrYSy6ArX5mElg?usp=drive_link 
 '''
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
 people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")

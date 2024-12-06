@@ -16,6 +16,7 @@ debugpy==1.8.9
 decorator==5.1.1
 exceptiongroup==1.2.2
 executing==2.1.0
+fastjsonschema==2.21.1
 fonttools==4.55.1
 geographiclib==2.0
 geopandas==1.0.1
@@ -38,6 +39,8 @@ matplotlib==3.9.3
 matplotlib-inline==0.1.7
 mercantile==1.2.1
 narwhals==1.15.2
+nbclient==0.10.1
+nbformat==5.10.4
 nest-asyncio==1.6.0
 numpy==2.0.2
 packaging==24.2
@@ -56,6 +59,7 @@ pyparsing==3.2.0
 pyproj==3.6.1
 python-dateutil==2.9.0.post0
 pytz==2024.2
+PyYAML==6.0.2
 pyzmq==26.2.0
 rasterio==1.4.3
 referencing==0.35.1

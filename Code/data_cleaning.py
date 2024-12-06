@@ -1,25 +1,23 @@
----
-title: "Final Project"
-format: html
----
-
-
-```{python}
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 import numpy as np
 
 #load raw crash and people data
+'''
+These raw files are too large to publish on github. They can be downloaded from the links below. Note that the files are frequently updated by the City and may have been updated since we downloaded them in October, which may yield slightly different results than our results.
+
+crashes dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if/about_data
+
+people dataset: https://data.cityofchicago.org/Transportation/Traffic-Crashes-People/u6pd-qa9d/about_data
+'''
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")
 people = pd.read_csv("Data/Raw/Traffic_Crashes_People.csv")
 
 #load road and community area data
 roads = pd.read_csv("Data/Raw/chicago_roads.csv")
 comm_areas = pd.read_csv("Data/Raw/CommAreas.csv")
-```
 
-```{python}
 #basic cleaning for crashes data
 
 #recode posted speed limits =99 as missing (affects 0.008% of obs)
@@ -42,9 +40,7 @@ crashes = crashes[crashes["LOCATION"].notna()]
 
 #create geometry column
 crashes["geometry"] = crashes["LOCATION"].apply(wkt.loads)
-```
 
-```{python}
 #clean people data to get pedestrians
 ped_data = people.loc[people["PERSON_TYPE"]=="PEDESTRIAN"]
 
@@ -77,10 +73,7 @@ ped_crashes = ped_crashes[["CRASH_RECORD_ID", "PEDPEDAL_ACTION", "binned_posted_
 
 #output cleaned csv
 ped_crashes.to_csv("Data/Clean/ped_crashes.csv", index=False)
-```
 
-
-```{python}
 # prep road and community area data for shiny app
 
 #create geometry column to turn roads csv into geopandas object
@@ -106,9 +99,7 @@ ped_crashes_gdf = ped_crashes_gdf.set_crs("EPSG:4326", inplace=True)
 #add community area to road and crash  data with spatial join
 roads_gdf = gpd.sjoin(roads_gdf, comm_areas_gdf, how="left")
 ped_crashes_gdf = gpd.sjoin(ped_crashes_gdf, comm_areas_gdf, how="left")
-```
 
-```{python}
 #define buffer distance around each road so that crash points lie within buffer
 buffer_distance = 0.00025
 
@@ -125,11 +116,8 @@ ped_crashes_gdf = gpd.sjoin(ped_crashes_gdf, buffered_gdf, how="left", predicate
 
 #drop buffer from road file
 roads_gdf = roads_gdf.drop(["buffer"], axis=1)
-```
 
-```{python}
 #output shapefiles
-ped_crashes_gdf.to_file("shiny-app/ped_crashes.shp")
-comm_areas_gdf.to_file("shiny-app/comm_areas.shp")
-roads_gdf.to_file("shiny-app/roads.shp")
-```
+ped_crashes_gdf.to_file("shiny-app/Data/ped_crashes.shp")
+comm_areas_gdf.to_file("shiny-app/Data/comm_areas.shp")
+roads_gdf.to_file("shiny-app/Data/roads.shp")

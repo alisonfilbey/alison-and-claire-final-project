@@ -5,11 +5,19 @@ author:
   - "Claire Conzelmann (Section 4; claireconzelmann)"
 format:
   html: default
-#    fig-location: H
-#     include-in-header: writeup_files/header.txt
+execute:
+  cache: false
+jupyter: python3
 fig-cap-location: top
 geometry: top=0.5in, left=0.75in, right=0.75in
 ---
+
+```{python}
+#| echo: false
+#| warning: false
+%run Code/data_cleaning.py
+%run Code/plots.py
+```
 
 ### Introduction
 Over the past decade, traffic fatalities among pedestrians and bicyclists have increased substantially in Northeastern Illinois. In 2014, there were 400 pedestrian fatalities in this region; in 2023, the number of pedestrian fatalities had increased to nearly 600 ([CMAP 2024](https://cmap.illinois.gov/wp-content/uploads/dlm_uploads/Speed-Management-Executive-Summary_CMAP_2024.pdf)). Due to this rise in traffic fatalities, the state of Illinois is considering lowering the statutory speed limit in urban areas from 30 mph to 25 mph. If adopted, this measure would decrease the speed limit on most city roads within Chicago.
@@ -27,7 +35,6 @@ We focus our analysis on crashes that cause severe pedestrian injuries. To do so
 For the Shiny app, we calculate the number of severe crashes on each road within a neighborhood. To do so, we first join the community area name to the roads geodataframe via a spatial join. Then, we subset the road and community area geodataframes to the community area inputted by the user. To join the road names in the road data to the crash points in our crash data, we first create a 0.00025 degree buffer around each road. Then, we spatially join the crash data to the road buffers using the "within" method. The buffer allows us to capture the crash points that happen along a given road. We then group by the road name and calculate the number of crashes on each road. To calculate the number of severe crashes within each neighborhood, we join the community area name to each point in the pedestrian crash data via a spatial join. This allows us to subset to the inputted community area, group by community area, and count the number of crashes within each area.
 
 ### Results
-
 Our analysis begins by examining the relationship between the posted speed limit on which the crash occurred and the severity of the injuries sustained by pedestrians. The majority of Chicago roads have a speed limit of 30mph (the current statutory speed limit). Thus, instead of looking at the number of severe pedestrian crashes, we look at the share of total pedestrian crashes that caused severe or fatal injuries by speed limit. As seen from Figure A, the share crashes causing severe pedestrian injuries increases with the posted speed limit. This share doubles when the posted speed limit increases from 35mph to 40mph. Interestingly, the share of crashes causing severe pedestrian injuries only slightly increases between 25 to 30 mph, signifying the proposed speed limit change may not drastically impact the number of pedestrian injuries. 
 
 ::: {layout-ncol=2}

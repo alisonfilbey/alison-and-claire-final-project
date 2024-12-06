@@ -10,10 +10,10 @@ This project is motivated by the recent rise in pedestrian traffic related fatal
 For more information on our data sources, methods, results, and policy implications, read our final report located at ...**/writeup.pdf**. An html version of our writeup can be recreated by knitting ...**/writeup.qmd**.
 
 ## Run our Code:
-To replicate our findings, run the code located in this repository in the following order:
+To replicate our findings, we recommend knitting our ...**/writeup.qmd**, which calls and runs our code files to produce our results. You can also replicate our results without knitting our report by running the code located in this repository in the following order:
 1. ...**Code/data_cleaning.py**
 2. ...**Code/plots.py**
 
 ## Run our App:
-After running ...**Code/data_cleaning.py**, load our shiny app located at ...**shiny-app/app.py** to view our dashboard that displays the locations of severe pedestrian crashes throughout Chicago neighborhoods.
+After knitting our ...**/writeup.qmd** or after running ...**Code/data_cleaning.py**, load our shiny app located at ...**shiny-app/app.py** to view our dashboard that displays the locations of severe pedestrian crashes throughout Chicago neighborhoods.
 

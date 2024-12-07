@@ -6,7 +6,7 @@ import numpy as np
 #load raw crash and people data
 '''
 These raw files are too large to publish on github. They can be downloaded from the Google Drive folder linked below.
-
+Once downloaded, you should add them to the Data/Raw folder
 https://drive.google.com/drive/folders/16oqPjuMoqH9tWm7X-AmrYSy6ArX5mElg?usp=drive_link 
 '''
 crashes = pd.read_csv("Data/Raw/Traffic_Crashes_Crashes.csv")

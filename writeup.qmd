@@ -15,6 +15,8 @@ geometry: top=0.5in, left=0.75in, right=0.75in
 ```{python}
 #| echo: false
 #| warning: false
+#note that to run the code below, the raw data needs to be downloaded from the following drive folder and put in the Data/Raw folder:
+#https://drive.google.com/drive/folders/16oqPjuMoqH9tWm7X-AmrYSy6ArX5mElg?usp=drive_link 
 %run Code/data_cleaning.py
 %run Code/plots.py
 ```

@@ -64,9 +64,46 @@ ped_crashes = pd.merge(crashes, ped_counts, on="CRASH_RECORD_ID", how="inner")
 ped_actions = people[["PEDPEDAL_ACTION", "CRASH_RECORD_ID"]]
 ped_crashes = pd.merge(ped_crashes, ped_actions, on="CRASH_RECORD_ID", how="left")
 
+#create dictionary for new values of crash cause
+crash_cause_xwalk = {"CELL PHONE USE OTHER THAN TEXTING":"Distraction", 
+    "DISTRACTION - FROM INSIDE VEHICLE":"Distraction", "DISTRACTION - FROM OUTSIDE VEHICLE":
+    "Distraction", "DISTRACTION - OTHER ELECTRONIC DEVICE (NAVIGATION DEVICE, DVD PLAYER, ETC.)":
+    "Distraction", "TEXTING":"Distraction", "DISREGARDING OTHER TRAFFIC SIGNS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING ROAD MARKINGS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING STOP SIGN":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING TRAFFIC SIGNALS":
+    "Disregard of Traffic Signs/Signals", "DISREGARDING YIELD SIGN":
+    "Disregard of Traffic Signs/Signals", "FAILING TO YIELD RIGHT-OF-WAY":
+    "Disregard of Traffic Signs/Signals", "RELATED TO BUS STOP":
+    "Disregard of Traffic Signs/Signals", "TURNING RIGHT ON RED":
+    "Disregard of Traffic Signs/Signals", 
+    "UNDER THE INFLUENCE OF ALCOHOL/DRUGS (USE WHEN ARREST IS EFFECTED)": 
+    "Under the Influence", "HAD BEEN DRINKING (USE WHEN ARREST IS NOT MADE)":"Under the Influence",
+    "PHYSICAL CONDITION OF DRIVER": "Under the Influence", "EXCEEDING AUTHORIZED SPEED LIMIT":
+    "Speeding", "EXCEEDING SAFE SPEED FOR CONDITIONS": "Speeding", 
+    "FAILING TO REDUCE SPEED TO AVOID CRASH": "Speeding", 
+    "OPERATING VEHICLE IN ERRATIC, RECKLESS, CARELESS, NEGLIGENT OR AGGRESSIVE MANNER":
+    "Reckless/poor driving", "DRIVING ON WRONG SIDE/WRONG WAY":"Reckless/poor driving", 
+    "FOLLOWING TOO CLOSELY":"Reckless/poor driving", "IMPROPER BACKING":"Reckless/poor driving",
+    "IMPROPER LANE USAGE":"Reckless/poor driving", "IMPROPER OVERTAKING/PASSING":
+    "Reckless/poor driving", "IMPROPER TURNING/NO SIGNAL":"Reckless/poor driving", 
+    "PASSING STOPPED SCHOOL BUS":"Reckless/poor driving", 
+    "DRIVING SKILLS/KNOWLEDGE/EXPERIENCE":"Reckless/poor driving", 
+    "ANIMAL":"Obstruction", "OBSTRUCTED CROSSWALKS":"Obstruction", 
+    "VISION OBSCURED (SIGNS, TREE LIMBS, BUILDINGS, ETC.)":"Obstruction", 
+    "BICYCLE ADVANCING LEGALLY ON RED LIGHT":"Obstruction", 
+    "EVASIVE ACTION DUE TO ANIMAL, OBJECT, NONMOTORIST":"Obstruction", 
+    "ROAD CONSTRUCTION/MAINTENANCE":"Exterior condition", 
+    "ROAD ENGINEERING/SURFACE/MARKING DEFECTS":"Exterior condition", 
+    "WEATHER":"Exterior condition", "EQUIPMENT - VEHICLE CONDITION":"Exterior condition", 
+    "NOT APPLICABLE":"Unclassified", "UNABLE TO DETERMINE":"Unclassified"}
+
+#replace new type variable
+ped_crashes["updated_cause"] = ped_crashes["PRIM_CONTRIBUTORY_CAUSE"].replace(crash_cause_xwalk)
+
 #keep relevant columns 
 ped_crashes = ped_crashes[["CRASH_RECORD_ID", "PEDPEDAL_ACTION", "binned_posted_speed",
-                            "n_peds_total", "n_peds_severe", "PRIM_CONTRIBUTORY_CAUSE",
+                            "n_peds_total", "n_peds_severe", "updated_cause",
                             "LATITUDE", "LONGITUDE", "geometry"]]
 
 #output cleaned csv
@@ -86,8 +123,6 @@ roads_gdf = roads_gdf[["OBJECTID", "STREET_NAM", "STREET_TYP", "SUF_DIR", "STREE
 comm_areas["geometry"] = comm_areas["the_geom"].apply(wkt.loads)
 comm_areas_gdf = gpd.GeoDataFrame(comm_areas, geometry="geometry")
 comm_areas_gdf = comm_areas_gdf.set_crs("EPSG:4326", inplace=True)
-
-#keep relevant columns for community area data
 comm_areas_gdf = comm_areas_gdf[["COMMUNITY", "geometry"]]
 
 #turn ped crashes df geopandas object

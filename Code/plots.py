@@ -52,43 +52,6 @@ ped_act_chart = alt.Chart(ped_action).mark_bar(color="seagreen", opacity=0.85).e
         "text": ["Number of Crashes with Severe Pedestrian Injuries", "by Action of the Pedestrian"]})
 ped_act_chart.save("Pictures/severe_ped_by_action.png", scale_factor=3)
 
-#create dictionary for new values of crash cause
-crash_cause_xwalk = {"CELL PHONE USE OTHER THAN TEXTING":"Distraction", 
-    "DISTRACTION - FROM INSIDE VEHICLE":"Distraction", "DISTRACTION - FROM OUTSIDE VEHICLE":
-    "Distraction", "DISTRACTION - OTHER ELECTRONIC DEVICE (NAVIGATION DEVICE, DVD PLAYER, ETC.)":
-    "Distraction", "TEXTING":"Distraction", "DISREGARDING OTHER TRAFFIC SIGNS":
-    "Disregard of Traffic Signs/Signals", "DISREGARDING ROAD MARKINGS":
-    "Disregard of Traffic Signs/Signals", "DISREGARDING STOP SIGN":
-    "Disregard of Traffic Signs/Signals", "DISREGARDING TRAFFIC SIGNALS":
-    "Disregard of Traffic Signs/Signals", "DISREGARDING YIELD SIGN":
-    "Disregard of Traffic Signs/Signals", "FAILING TO YIELD RIGHT-OF-WAY":
-    "Disregard of Traffic Signs/Signals", "RELATED TO BUS STOP":
-    "Disregard of Traffic Signs/Signals", "TURNING RIGHT ON RED":
-    "Disregard of Traffic Signs/Signals", 
-    "UNDER THE INFLUENCE OF ALCOHOL/DRUGS (USE WHEN ARREST IS EFFECTED)": 
-    "Under the Influence", "HAD BEEN DRINKING (USE WHEN ARREST IS NOT MADE)":"Under the Influence",
-    "PHYSICAL CONDITION OF DRIVER": "Under the Influence", "EXCEEDING AUTHORIZED SPEED LIMIT":
-    "Speeding", "EXCEEDING SAFE SPEED FOR CONDITIONS": "Speeding", 
-    "FAILING TO REDUCE SPEED TO AVOID CRASH": "Speeding", 
-    "OPERATING VEHICLE IN ERRATIC, RECKLESS, CARELESS, NEGLIGENT OR AGGRESSIVE MANNER":
-    "Reckless/poor driving", "DRIVING ON WRONG SIDE/WRONG WAY":"Reckless/poor driving", 
-    "FOLLOWING TOO CLOSELY":"Reckless/poor driving", "IMPROPER BACKING":"Reckless/poor driving",
-    "IMPROPER LANE USAGE":"Reckless/poor driving", "IMPROPER OVERTAKING/PASSING":
-    "Reckless/poor driving", "IMPROPER TURNING/NO SIGNAL":"Reckless/poor driving", 
-    "PASSING STOPPED SCHOOL BUS":"Reckless/poor driving", 
-    "DRIVING SKILLS/KNOWLEDGE/EXPERIENCE":"Reckless/poor driving", 
-    "ANIMAL":"Obstruction", "OBSTRUCTED CROSSWALKS":"Obstruction", 
-    "VISION OBSCURED (SIGNS, TREE LIMBS, BUILDINGS, ETC.)":"Obstruction", 
-    "BICYCLE ADVANCING LEGALLY ON RED LIGHT":"Obstruction", 
-    "EVASIVE ACTION DUE TO ANIMAL, OBJECT, NONMOTORIST":"Obstruction", 
-    "ROAD CONSTRUCTION/MAINTENANCE":"Exterior condition", 
-    "ROAD ENGINEERING/SURFACE/MARKING DEFECTS":"Exterior condition", 
-    "WEATHER":"Exterior condition", "EQUIPMENT - VEHICLE CONDITION":"Exterior condition", 
-    "NOT APPLICABLE":"Unclassified", "UNABLE TO DETERMINE":"Unclassified"}
-
-#replace new type variable
-ped_crashes["updated_cause"] = ped_crashes["PRIM_CONTRIBUTORY_CAUSE"].replace(crash_cause_xwalk)
-
 #collapse by cause of crash
 severe_crashes_by_cause = ped_crashes.groupby("updated_cause")[
     ["n_peds_total", "n_peds_severe"]].sum().reset_index()
